@@ -1,0 +1,453 @@
+#! /usr/bin/env perl
+
+=head1 NAME
+
+heatmapper - Make a heatmap from an OTU table
+
+=head1 VERSION
+
+0.5
+
+=head1 SYNOPSIS
+
+  heatmapper -i otu_table.txt
+
+=head1 DESCRIPTION
+
+This will run R heatmap and colorize species belonging to the same taxon.
+
+=head1 REQUIRED ARGUMENTS
+
+=over
+
+=item -i <input_file>
+
+A tab-separated community table. Rows represent different species while columns
+are the different sites (or samples). Row and column names (headers) are expected.
+Taxonomic assignments should be semi-colon delimited, such as in the Greengenes
+or Silva formats, e.g.:
+
+   k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
+   Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
+
+WARNING: THE FILE HAS TO BE SORTED TAXONOMICALLY!
+
+=for Euclid:
+    input_file.type: readable
+
+=back
+
+=head1 OPTIONAL ARGUMENTS
+
+=over
+
+=item -m <matrix_file>
+
+Instead of performing the hierarchical clustering of the communities based on
+their euclidean distance, you can provide a tab-delimited matrix containing the
+distance of your choice (e.g. Unifrac distance).
+
+=for Euclid:
+    matrix_file.type: readable
+
+=item -t <taxonomy_level>
+
+Specify at which taxonomy level to colorize: 'k'ingdom, 'p'hylum, 'c'lass,
+'o'rder, 'f'amily, 'g'enus or 's'pecies. Default: taxonomy_level.default
+
+=for Euclid:
+    taxonomy_level.type: /k|p|c|o|f|g|s/
+    taxonomy_level.default: 'k'
+    taxonomy_level.type.error: <taxonomy_level> can only be k, p, c, o, f, g or s
+
+=item -l <legend_taxonomy>
+
+Specify how to display the taxonomy on the heatmap:
+
+full: the entire taxonomy string (e.g. k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII),
+
+local: the taxonomic group specified with the -t option (e.g. p__Euryarchaeota) only,
+
+auto: everything that comes after 'local' (e.g. p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII),
+
+first: the first element of the taxonomy (e.g. k__Archaea),
+
+last: the last element of the taxonomy (e.g. f__MarinegroupII).
+
+Default: legend_taxonomy.default
+
+=for Euclid:
+    legend_taxonomy.type: /full|local|auto|first|last/
+    legend_taxonomy.default: 'auto'
+    legend_taxonomy.type.error: <legend_taxonomy> can only be 'full', 'local', 'auto', 'first' or 'last'.
+
+=item -h <hierarch_clust>
+
+Whether or not to cluster the samples hierarchically and display a dendrogram
+(0: no, 1: yes). Default: hierarch_clust.default
+
+=for Euclid:
+    hierarch_clust.type: /0|1/
+    hierarch_clust.default: 1
+    hierarch_clust.type.error: <hierarch_clust> can only be 0 (no) or 1 (yes).
+
+=item -o <output_name>
+
+File path where to create the output graph. Note that the file extension
+specifies which graphic format to use: SVG, PDF, PNG, etc. Default: output_name.default
+
+=for Euclid:
+    output_name.type: string
+    output_name.default: 'heatmapper.svg'
+
+=item -s <width>x<height>
+
+Size (width and height) of the output image, in pixels. Default: width.defaultxheight.default
+
+=for Euclid:
+    width.type: +integer
+    height.type: +integer
+    width.default: 20
+    height.default: 20
+
+=back
+
+=head1 EXAMPLES
+
+=over
+
+=item * SVG output with phylum colors
+
+heatmapper -i otu_table.txt -s 30x5
+
+=item * PNG output, coloring at the order taxonomic level
+
+heatmapper -i otu_table.txt -p o -s 5000x1000 -o heatmap.png
+
+=back
+
+=head1 AUTHOR
+
+Florent Angly <florent.angly@gmail.com>
+
+This script is simply a convenient wrapper to draw heatmaps. But all the useful
+code was taken from existing scripts written by Dana Willner.
+
+=head1 INSTALLATION
+
+=head2 Dependencies
+
+You need to install these dependencies first:
+
+=over
+
+=item *
+
+Perl
+
+L<http://www.perl.com/download.csp>
+
+
+=item *
+
+make
+
+Many systems have make installed by default. If your system does not, you should
+install the implementation of make of your choice, e.g. GNU make: L<http://www.gnu.org/s/make/>
+
+=item *
+
+R
+
+L<http://www.r-project.org>
+
+
+You also need these two R libraries: gplots, RColorBrewer
+
+=back
+
+The following CPAN Perl modules are dependencies that will be installed automatically
+for you:
+
+=over
+
+=item *
+
+Getopt::Euclid (>= 0.3.4)
+
+=item *
+
+Statistics::R
+
+=back
+
+=head2 Procedure
+
+To install HeatMapper globally on your system, run the following
+commands in a terminal or command prompt:
+
+On Linux, Unix, MacOS:
+
+   perl Makefile.PL
+   make
+
+And finally, with administrator privileges:
+
+   make install
+
+On Windows, run the same commands but with nmake instead of make.
+
+=head2 No administrator privileges?
+
+If you do not have administrator privileges, HeatMapper needs to be
+installed in your home directory.
+
+First, follow the instructions to install local::lib
+at L<http://search.cpan.org/~apeiron/local-lib-1.008004/lib/local/lib.pm#The_bootstrapping_technique>.
+After local::lib is installed, every Perl module that you install manually or
+through the CPAN command-line application will be installed in your home directory.
+
+Then, install HeatMapper by following the instructions detailed in
+the "Procedure" section.
+
+=head1 BUGS
+
+There are undoubtedly serious bugs lurking somewhere in this code.
+Bug reports and other feedback are most welcome.
+
+=head1 COPYRIGHT
+
+Copyright 2012, Florent Angly
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=cut
+
+
+use 5.005; # Perl >= version 5.5
+use strict;
+use warnings;
+use List::Util qw(max);
+use File::Basename;
+use File::Temp qw/ tempfile /;
+use Statistics::R;  
+use Getopt::Euclid qw( :minimal_keys );
+our $VERSION = 0.3;
+heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{h}, $ARGV{o},
+           $ARGV{s}{width}, $ARGV{s}{height});
+exit;
+
+
+sub heatmapper {
+   my ($input_file, $matrix_file, $taxo_level, $legend_taxonomy,
+      $hierarch_clust, $output_name, $width, $height) = @_;
+   my $samples = process_samples($input_file);
+   my ($colors, $taxa) = process_taxa($input_file, $taxo_level, $legend_taxonomy);
+   my $output_file = draw_heatmap($input_file, $colors, $taxa, $samples,
+      $hierarch_clust, $output_name, $width, $height, $matrix_file);
+   print "Heatmap written in file '$output_file'.\n";
+   return 1;
+}
+
+
+sub process_samples {
+   # Read the samples from the given file
+   my ($infile) = @_;
+   open my $in, '<', $infile or die "Error: Could not read file '$infile'\n$!\n";
+   my $header_line = <$in>;
+   close $in;
+   chomp $header_line;
+   my @samples = split /\s+/, $header_line;
+   shift @samples;
+   return \@samples;
+}
+
+
+sub process_taxa {
+   # Read the taxa in the given file, and get them a color and a label
+   my ($infile, $taxo_level, $legend_taxonomy) = @_;
+
+   my @taxa;
+   my @taxo_colors; # color attribution to taxa
+   my %colors_by_taxo;
+   my @possible_colors = ('red', 'blue', 'green', 'grey','black'); ### more colors?
+   my $color_max = scalar @possible_colors;
+   my $color_index = 0;
+
+   # Determine taxon level to pick
+   $taxo_level = lc $taxo_level;
+   if ($taxo_level !~ m/[kpcofgs]/) {
+      die "Error: '$taxo_level' is not a valid taxonomic level to use\n";
+   }
+   my %levels = (
+      'k' => 1,
+      'p' => 2,
+      'c' => 3,
+      'o' => 4,
+      'f' => 5,
+      'g' => 6,
+      's' => 7,
+   );
+   my $level_idx = $levels{$taxo_level} - 1;
+
+   # Define some regular expressions
+   my $taxo_regexp = qr/ $taxo_level __ ([a-z0-9]*) /ix;
+   my $taxo_separator    = qr/\s*;/;
+   my $taxo_single_entry = qr/(?:\w|(?:(?!\t)\s))+/;
+   my $taxo_empty_entry  = qr/^(?:\S__|other)$/i;
+
+   # Read file but skip first line... it's the header line
+   if (not defined $infile) {
+      die "Error: Need to provide an input file\n";
+   }
+   open my $in, '<', $infile or die "Error: Could not read file '$infile'\n$!\n";
+   my $header_line = <$in>;
+   while ( <$in> ) {
+      chomp;
+
+      # Find taxonomy string and clean it
+      my ($full_taxo) = m/( (?:$taxo_single_entry $taxo_separator)* $taxo_single_entry )/x;
+      my @groups = split $taxo_separator, $full_taxo;
+      while ($groups[-1] =~ $taxo_empty_entry) {
+         pop @groups;
+      }
+      @groups = map { $_ =~ s/^\S__(.*)$/$1/; $_ } @groups;
+      if (scalar @groups == 0) {
+         $groups[0] = 'unknown';
+      }
+      $full_taxo = join ';', @groups;
+
+      # Determine color for this taxon
+      my $taxo = $groups[ $level_idx ];
+      $taxo ||= '';
+      if (not exists $colors_by_taxo{$taxo}) {
+         # Assign a new color to this taxon
+         $colors_by_taxo{$taxo} = $possible_colors[$color_index];
+         # Skip to next color
+         $color_index++;
+         if ($color_index >= $color_max) {
+            $color_index = 0;
+         }
+      }
+      push @taxo_colors, $colors_by_taxo{$taxo};
+
+      # Determine text to display for this taxon
+      if ($legend_taxonomy eq 'full') {
+         $taxo = $full_taxo;
+      } elsif ($legend_taxonomy eq 'first') {
+         $taxo = shift @groups;
+      } elsif ($legend_taxonomy eq 'last') {
+         $taxo = pop @groups;
+      } elsif ($legend_taxonomy eq 'local') {
+         $taxo = $taxo;
+      } elsif ($legend_taxonomy eq 'auto') {
+         my $max = scalar @groups - 1;
+         for my $i (0 .. $max) {
+            my $level = $groups[$i];
+            if ($level eq $taxo) {
+               $taxo = join ';', @groups[$i+1 .. $max];
+               last;
+            }
+         }
+      } else {
+         die "Error: '$legend_taxonomy' is not a valid value for <legend_taxonomy>\n";
+      }
+      push @taxa, $taxo;
+
+   }
+
+   close $in;
+   return \@taxo_colors, \@taxa;
+}
+
+
+sub draw_heatmap {
+   my ($input_file, $colors, $taxa, $samples, $hierarch_clust, $output_file,
+      $width, $height, $matrix_file) = @_;
+   my $verbose = 1;
+
+   # Graphic format
+   my $format = lc( (fileparse($output_file, qr/\.[^.]*/))[2] || '' );
+   $format =~ s/^\.//;
+   if (not $format) {
+      die "Error: The output file specified, '$output_file', does not have an ".
+         "extension. Don't know what graphic format to use...\n";
+   }
+
+   ####
+   # After this script uses Bio::Community, one could do the clustering first,
+   # then summarize the community, including an "Other" group
+   # then plotting the heatmap, passing the clustering to the function.
+   ####
+
+   # Size of margins:
+   # For taxon labels, 25 cols fit ~76 chars, i.e. need 0.33 col per char
+   # For sample labels, 7 cols fit ~17 chars, i.e. need 0.42  col per char
+   my $right_chars  = max( map { length($_) } @$taxa    );
+   my $right_mar    = $right_chars  * 0.33;
+   my $bottom_chars = max( map { length($_) } @$samples );
+   my $bottom_mar   = $bottom_chars * 0.42;
+
+   # Pass some variables to R
+   my $R = Statistics::R->new();
+   $R->set('community_file', $input_file);
+   $R->set('output_file', $output_file);
+   $R->set('width', $width);
+   $R->set('height', $height);
+   $R->set('colors', $colors);
+   $R->set('taxa', $taxa);
+   $R->set('bottom_mar', $bottom_mar);
+   $R->set('right_mar', $right_mar);
+
+   # Build list of R commands to execute, using heatmap.2 for plotting
+   my @cmds = (
+       q`library(gplots);`,
+       q`library(RColorBrewer);`,
+       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`,
+       # use comment.char="" to avoid R interpreting # as a comment
+       q`x<-(dim(HMold)[2]);`,
+       q`y<-(dim(HMold)[1]);`,
+       q`HM<-HMold[1:y,2:x];`,
+       q`HMmatrix<-as.matrix(HM);`,
+      qq`$format(output_file, width=width, height=height);`,
+   );
+
+   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none',col=c("white",brewer.pal(7,"PuRd")), breaks=c(0,0.01,0.1,1,5,10,25,50,100), key=TRUE, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.15,0.85),`;
+   if ($hierarch_clust) {
+      $plot_cmd .= q`Colv=TRUE, dendrogram="column"`;
+   } else {
+      $plot_cmd .= q`Colv=FALSE, dendrogram="none"`;
+   }
+   if ($matrix_file) {
+       $R->set('matrix_file', $matrix_file);
+       push @cmds, q`dist <- read.table(matrix_file, sep="\t", header=TRUE, row.names=1);`;
+       push @cmds, q`dist <- as.dist(dist);`;
+       $plot_cmd .= q`, distfun=function(c) dist`;
+   }
+   $plot_cmd .= q`);`;
+   push @cmds, $plot_cmd;
+   push @cmds, q`dev.off();`;
+
+   # Execute R commands
+   for my $cmd (@cmds) {
+      my $out = $R->run($cmd);
+      if ($verbose) {
+         print "$out\n";
+      }
+   }
+
+   $R->stop();
+
+   return $output_file;
+}
