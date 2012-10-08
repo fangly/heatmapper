@@ -1,6 +1,6 @@
 use inc::Module::Install;
 
-name     'HeatMapper';
+name     'heatmapper';
 all_from 'script/heatmapper';
 license  'gpl3'; # Module::Install 1.04 does not parse the GPL version number
 
