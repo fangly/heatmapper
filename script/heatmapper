@@ -84,7 +84,7 @@ Default: legend_taxonomy.default
 =item -p <palette_col>
 
 Palette of colors to use: 'PuRd', an 8-color palette going from white to
-red, 'Jet', a 32-color palette going from blue to green to red. Default: palette.col
+red, 'Jet', a 32-color palette going from blue to green to red. Default: palette_col.default
 
 =for Euclid:
     palette_col.type: /(?:PuRd|Jet)/
