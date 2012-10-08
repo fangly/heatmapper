@@ -81,6 +81,16 @@ Default: legend_taxonomy.default
     legend_taxonomy.default: 'auto'
     legend_taxonomy.type.error: <legend_taxonomy> can only be 'full', 'local', 'auto', 'first' or 'last'.
 
+=item -p <palette_col>
+
+Palette of colors to use: 'PuRd', an 8-color palette going from white to
+red, 'Jet', a 32-color palette going from blue to green to red. Default: palette.col
+
+=for Euclid:
+    palette_col.type: /(?:PuRd|Jet)/
+    palette_col.default: 'Jet'
+    palette_col.type.error: <palette_col> can only be 'Jet' or 'PuRd'.
+
 =item -h <hierarch_clust>
 
 Whether or not to cluster the samples hierarchically and display a dendrogram
@@ -244,18 +254,18 @@ use File::Temp qw/ tempfile /;
 use Statistics::R;  
 use Getopt::Euclid qw( :minimal_keys );
 our $VERSION = 0.5;
-heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{h}, $ARGV{o},
+heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{p}, $ARGV{h}, $ARGV{o},
            $ARGV{s}{width}, $ARGV{s}{height});
 exit;
 
 
 sub heatmapper {
    my ($input_file, $matrix_file, $taxo_level, $legend_taxonomy,
-      $hierarch_clust, $output_name, $width, $height) = @_;
+      $palette, $hierarch_clust, $output_name, $width, $height) = @_;
    my $samples = process_samples($input_file);
    my ($colors, $taxa) = process_taxa($input_file, $taxo_level, $legend_taxonomy);
    my $output_file = draw_heatmap($input_file, $colors, $taxa, $samples,
-      $hierarch_clust, $output_name, $width, $height, $matrix_file);
+      $hierarch_clust, $output_name, $width, $height, $matrix_file, $palette);
    print "Heatmap written in file '$output_file'.\n";
    return 1;
 }
@@ -374,7 +384,7 @@ sub process_taxa {
 
 sub draw_heatmap {
    my ($input_file, $colors, $taxa, $samples, $hierarch_clust, $output_file,
-      $width, $height, $matrix_file) = @_;
+      $width, $height, $matrix_file, $palette) = @_;
    my $verbose = 1;
 
    # Graphic format
@@ -423,18 +433,38 @@ sub draw_heatmap {
       qq`$format(output_file, width=width, height=height);`,
    );
 
-   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none',col=c("white",brewer.pal(7,"PuRd")), breaks=c(0,0.01,0.1,1,5,10,25,50,100), key=TRUE, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.15,0.85),`;
-   if ($hierarch_clust) {
-      $plot_cmd .= q`Colv=TRUE, dendrogram="column"`;
+   # Select the specified color palette
+   if ($palette eq 'PuRd') {
+      # 8 color purple to red palette
+      push @cmds, q`breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`;
+      push @cmds, q`col.palette <- c("white",brewer.pal(7,"PuRd"))`;
+   } elsif ('Jet') {
+      # 32 colors blue to green to red palette
+      push @cmds, q`num_colors <- 32;`;
+      push @cmds, q`breaks <- seq(0,100,100/(num_colors-1));`;
+      push @cmds, q`base<-1.1;`;
+      push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
+      push @cmds, q`library(colorRamps);`;
+      push @cmds, q`col.palette <- blue2green2red(num_colors);`;
    } else {
-      $plot_cmd .= q`Colv=FALSE, dendrogram="none"`;
+      die "Error: No such color palette, '$palette'\n";
    }
+
+   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=breaks, key=TRUE, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.15,0.85)`;
+
+   if ($hierarch_clust) {
+      $plot_cmd .= q`, Colv=TRUE, dendrogram="column"`;
+   } else {
+      $plot_cmd .= q`, Colv=FALSE, dendrogram="none"`;
+   }
+
    if ($matrix_file) {
        $R->set('matrix_file', $matrix_file);
        push @cmds, q`dist <- read.table(matrix_file, sep="\t", header=TRUE, row.names=1);`;
        push @cmds, q`dist <- as.dist(dist);`;
        $plot_cmd .= q`, distfun=function(c) dist`;
    }
+
    $plot_cmd .= q`);`;
    push @cmds, $plot_cmd;
    push @cmds, q`dev.off();`;
