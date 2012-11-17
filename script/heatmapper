@@ -326,6 +326,9 @@ sub process_taxa {
    while ( <$in> ) {
       chomp;
 
+      # Skip empty lines
+      next if m/^\s*$/;
+
       # Find taxonomy string and clean it
       my ($full_taxo) = m/( (?:$taxo_single_entry $taxo_separator)* $taxo_single_entry )/x;
       my @groups = split $taxo_separator, $full_taxo;
@@ -442,7 +445,7 @@ sub draw_heatmap {
       # 32 colors blue to green to red palette
       push @cmds, q`num_colors <- 32;`;
       push @cmds, q`breaks <- seq(0,100,100/(num_colors-1));`;
-      push @cmds, q`base<-1.1;`;
+      push @cmds, q`base <- 1.1;`;
       push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
       push @cmds, q`library(colorRamps);`;
       push @cmds, q`col.palette <- blue2green2red(num_colors);`;
