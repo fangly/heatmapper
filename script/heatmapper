@@ -314,7 +314,8 @@ sub process_taxa {
    # Define some regular expressions
    my $taxo_regexp = qr/ $taxo_level __ ([a-z0-9]*) /ix;
    my $taxo_separator    = qr/\s*;/;
-   my $taxo_single_entry = qr/(?:\w|(?:(?!\t)\s))+/;
+   #my $taxo_single_entry = qr/(?:\w|(?:(?!\t)\s))+/; # no good for names with spaces or special chars like '-'
+   my $taxo_single_entry = qr/[^\t]+/;
    my $taxo_empty_entry  = qr/^(?:\S__|other)$/i;
 
    # Read file but skip first line... it's the header line
