@@ -84,21 +84,24 @@ Default: legend_taxonomy.default
 =item -p <palette_col>
 
 Palette of colors to use: 'PuRd', an 8-color palette going from white to
-red, 'Jet', a 32-color palette going from blue to green to red. Default: palette_col.default
+red, 'Jet', a 32-color palette going from blue to green to red, 'Jet2', another
+jet palette that starts with lighter blue and but ends with darker red. Default:
+palette_col.default
 
 =for Euclid:
-    palette_col.type: /(?:PuRd|Jet)/
+    palette_col.type: /(?:PuRd|Jet|Jet2)/
     palette_col.default: 'Jet'
     palette_col.type.error: <palette_col> can only be 'Jet' or 'PuRd'.
 
 =item -h <hierarch_clust>
 
 Whether or not to cluster the samples hierarchically and display a dendrogram
-(0: no, 1: yes). Default: hierarch_clust.default
+(0: no, 1: yes). Note: Do not use if you have grouped low-abundance OTUs or
+species into an "Other" category. Default: hierarch_clust.default
 
 =for Euclid:
     hierarch_clust.type: /0|1/
-    hierarch_clust.default: 1
+    hierarch_clust.default: 0
     hierarch_clust.type.error: <hierarch_clust> can only be 0 (no) or 1 (yes).
 
 =item -o <output_name>
@@ -428,7 +431,7 @@ sub draw_heatmap {
    my @cmds = (
        q`library(gplots);`,
        q`library(RColorBrewer);`,
-       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`,
+       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`, ### row.names=1 ?
        # use comment.char="" to avoid R interpreting # as a comment
        q`x<-(dim(HMold)[2]);`,
        q`y<-(dim(HMold)[1]);`,
@@ -450,6 +453,14 @@ sub draw_heatmap {
       push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
       push @cmds, q`library(colorRamps);`;
       push @cmds, q`col.palette <- blue2green2red(num_colors);`;
+   } elsif ('Jet2') {
+      # 32 colors blue to green to red palette
+      push @cmds, q`num_colors <- 32;`;
+      push @cmds, q`breaks <- seq(0,100,100/(num_colors-1));`;
+      push @cmds, q`base <- 1.1;`;
+      push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
+      push @cmds, q`library(gplots);`;
+      push @cmds, q`col.palette <- rich.colors(num_colors);`;
    } else {
       die "Error: No such color palette, '$palette'\n";
    }
