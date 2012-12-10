@@ -93,6 +93,16 @@ with lighter red. Default: palette_col.default
     palette_col.default: 'Jet'
     palette_col.type.error: <palette_col> can only be 'Jet' or 'PuRd'.
 
+=item -n <na_col>
+
+For species with an abundance of zero, instead of using the color specified by
+<palette_col>, use the plot background color. Default: na_col.default
+
+=for Euclid:
+    na_col.type: /0|1/
+    na_col.default: 0
+    na_col.type.error: <na_col> can only be 0 (no) or 1 (yes).
+
 =item -h <hierarch_clust>
 
 Whether or not to cluster the samples hierarchically and display a dendrogram
@@ -257,18 +267,19 @@ use File::Temp qw/ tempfile /;
 use Statistics::R;  
 use Getopt::Euclid qw( :minimal_keys );
 our $VERSION = 0.5;
-heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{p}, $ARGV{h}, $ARGV{o},
-           $ARGV{s}{width}, $ARGV{s}{height});
+heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{p}, $ARGV{n}, $ARGV{h},
+   $ARGV{o}, $ARGV{s}{width}, $ARGV{s}{height});
 exit;
 
 
 sub heatmapper {
-   my ($input_file, $matrix_file, $taxo_level, $legend_taxonomy,
-      $palette, $hierarch_clust, $output_name, $width, $height) = @_;
+   my ($input_file, $matrix_file, $taxo_level, $legend_taxonomy, $palette,
+      $na_col, $hierarch_clust, $output_name, $width, $height) = @_;
    my $samples = process_samples($input_file);
    my ($colors, $taxa) = process_taxa($input_file, $taxo_level, $legend_taxonomy);
    my $output_file = draw_heatmap($input_file, $colors, $taxa, $samples,
-      $hierarch_clust, $output_name, $width, $height, $matrix_file, $palette);
+      $hierarch_clust, $output_name, $width, $height, $matrix_file, $palette,
+      $na_col);
    print "Heatmap written in file '$output_file'.\n";
    return 1;
 }
@@ -391,7 +402,7 @@ sub process_taxa {
 
 sub draw_heatmap {
    my ($input_file, $colors, $taxa, $samples, $hierarch_clust, $output_file,
-      $width, $height, $matrix_file, $palette) = @_;
+      $width, $height, $matrix_file, $palette, $na_col) = @_;
    my $verbose = 1;
 
    # Graphic format
@@ -431,40 +442,48 @@ sub draw_heatmap {
    my @cmds = (
        q`library(gplots);`,
        q`library(RColorBrewer);`,
-       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`, ### row.names=1 ?
+       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`,
+       # row.names=1 ?
        # use comment.char="" to avoid R interpreting # as a comment
+   );
+
+   if ($na_col) {
+      # Replace 0 by NA so that zero-abundance species get a different color
+      push @cmds, q`HMold[] <- lapply(HMold, function(x){replace(x, x == 0, NA)});`;
+   }
+
+   push @cmds,
        q`x<-(dim(HMold)[2]);`,
        q`y<-(dim(HMold)[1]);`,
        q`HM<-HMold[1:y,2:x];`,
        q`HMmatrix<-as.matrix(HM);`,
-      qq`$format(output_file, width=width, height=height);`,
-   );
+      qq`$format(output_file, width=width, height=height);`;
 
    # Select the specified color palette
    if ($palette eq 'PuRd') {
       # 8 color purple to red palette
-      push @cmds, q`col.breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`;
-      push @cmds, q`col.palette <- c("white",brewer.pal(7,"PuRd"))`;
+      push @cmds, q`col.breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`,
+                  q`col.palette <- c("white",brewer.pal(7,"PuRd"))`;
    } elsif ($palette eq 'Jet') {
       # 32 colors blue to green to red palette
-      push @cmds, q`num_colors <- 32;`;
-      push @cmds, q`col.breaks <- seq(0,100,100/(num_colors-1));`;
-      push @cmds, q`base <- 1.1;`;
-      push @cmds, q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`;
-      push @cmds, q`library(colorRamps);`;
-      push @cmds, q`col.palette <- blue2green2red(num_colors);`;
+      push @cmds, q`num_colors <- 32;`,
+                  q`col.breaks <- seq(0,100,100/(num_colors-1));`,
+                  q`base <- 1.1;`,
+                  q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`,
+                  q`library(colorRamps);`,
+                  q`col.palette <- blue2green2red(num_colors);`;
    } elsif ($palette eq 'Jet2') {
       # 32 colors blue to green to red palette
-      push @cmds, q`num_colors <- 32;`;
-      push @cmds, q`col.breaks <- seq(0,100,100/(num_colors-1));`;
-      push @cmds, q`base <- 1.1;`;
-      push @cmds, q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`;
-      push @cmds, q`col.palette <- rich.colors(num_colors);`;
+      push @cmds, q`num_colors <- 32;`,
+                  q`col.breaks <- seq(0,100,100/(num_colors-1));`,
+                  q`base <- 1.1;`,
+                  q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`,
+                  q`col.palette <- rich.colors(num_colors);`;
    } else {
       die "Error: No such color palette, '$palette'\n";
    }
 
-   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.10,0.90), key=TRUE`;
+   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.08,0.92), key=TRUE`;
    #### Would be nice to have key=FALSE but get a 'margin too large' error
 
    if ($hierarch_clust) {
@@ -475,8 +494,8 @@ sub draw_heatmap {
 
    if ($matrix_file) {
        $R->set('matrix_file', $matrix_file);
-       push @cmds, q`dist <- read.table(matrix_file, sep="\t", header=TRUE, row.names=1);`;
-       push @cmds, q`dist <- as.dist(dist);`;
+       push @cmds, q`dist <- read.table(matrix_file, sep="\t", header=TRUE, row.names=1);`,
+                   q`dist <- as.dist(dist);`;
        $plot_cmd .= q`, distfun=function(c) dist`;
    }
 
@@ -484,9 +503,9 @@ sub draw_heatmap {
    push @cmds, $plot_cmd;
 
    # Make a custom legend
-   push @cmds, q`col.text <- format(col.breaks, digits=2);`;
-   push @cmds, q`col.text <- mapply( function(x,i){ if(i%%4==1) {x} else {""} }, col.text, 1:length(col.text) );`;
-   push @cmds, q`legend(-0.04,0.925, legend=col.text, fill=c(col.palette,NA), ncol=1, bty="n", border="NA", x.intersp=0.5, y.intersp=0.50, cex=1.0, xpd=TRUE);`;
+   push @cmds, q`col.text <- format(col.breaks, digits=2);`,
+               q`col.text <- mapply( function(x,i){ if(i%%4==1) {x} else {""} }, col.text, 1:length(col.text) );`,
+               q`legend(-0.04,0.925, legend=col.text, fill=c(col.palette,NA), ncol=1, bty="n", border="NA", x.intersp=0.5, y.intersp=0.50, cex=1.0, xpd=TRUE);`;
 
    push @cmds, q`dev.off();`;
 
