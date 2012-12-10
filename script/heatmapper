@@ -85,8 +85,8 @@ Default: legend_taxonomy.default
 
 Palette of colors to use: 'PuRd', an 8-color palette going from white to
 red, 'Jet', a 32-color palette going from blue to green to red, 'Jet2', another
-jet palette that starts with lighter blue and but ends with darker red. Default:
-palette_col.default
+jet palette that starts with darker blue, has less cyan in the middle, and ends
+with lighter red. Default: palette_col.default
 
 =for Euclid:
     palette_col.type: /(?:PuRd|Jet|Jet2)/
@@ -443,29 +443,29 @@ sub draw_heatmap {
    # Select the specified color palette
    if ($palette eq 'PuRd') {
       # 8 color purple to red palette
-      push @cmds, q`breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`;
+      push @cmds, q`col.breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`;
       push @cmds, q`col.palette <- c("white",brewer.pal(7,"PuRd"))`;
-   } elsif ('Jet') {
+   } elsif ($palette eq 'Jet') {
       # 32 colors blue to green to red palette
       push @cmds, q`num_colors <- 32;`;
-      push @cmds, q`breaks <- seq(0,100,100/(num_colors-1));`;
+      push @cmds, q`col.breaks <- seq(0,100,100/(num_colors-1));`;
       push @cmds, q`base <- 1.1;`;
-      push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
+      push @cmds, q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`;
       push @cmds, q`library(colorRamps);`;
       push @cmds, q`col.palette <- blue2green2red(num_colors);`;
-   } elsif ('Jet2') {
+   } elsif ($palette eq 'Jet2') {
       # 32 colors blue to green to red palette
       push @cmds, q`num_colors <- 32;`;
-      push @cmds, q`breaks <- seq(0,100,100/(num_colors-1));`;
+      push @cmds, q`col.breaks <- seq(0,100,100/(num_colors-1));`;
       push @cmds, q`base <- 1.1;`;
-      push @cmds, q`breaks <- c(0, base^breaks / base^100 * 100)`;
-      push @cmds, q`library(gplots);`;
+      push @cmds, q`col.breaks <- c(0, base^col.breaks / base^100 * 100)`;
       push @cmds, q`col.palette <- rich.colors(num_colors);`;
    } else {
       die "Error: No such color palette, '$palette'\n";
    }
 
-   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=breaks, key=TRUE, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.15,0.85)`;
+   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.10,0.90), key=TRUE`;
+   #### Would be nice to have key=FALSE but get a 'margin too large' error
 
    if ($hierarch_clust) {
       $plot_cmd .= q`, Colv=TRUE, dendrogram="column"`;
@@ -482,6 +482,12 @@ sub draw_heatmap {
 
    $plot_cmd .= q`);`;
    push @cmds, $plot_cmd;
+
+   # Make a custom legend
+   push @cmds, q`col.text <- format(col.breaks, digits=2);`;
+   push @cmds, q`col.text <- mapply( function(x,i){ if(i%%4==1) {x} else {""} }, col.text, 1:length(col.text) );`;
+   push @cmds, q`legend(-0.04,0.925, legend=col.text, fill=c(col.palette,NA), ncol=1, bty="n", border="NA", x.intersp=0.5, y.intersp=0.50, cex=1.0, xpd=TRUE);`;
+
    push @cmds, q`dev.off();`;
 
    # Execute R commands
