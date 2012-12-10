@@ -483,7 +483,11 @@ sub draw_heatmap {
       die "Error: No such color palette, '$palette'\n";
    }
 
-   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.08,0.92), key=TRUE`;
+   ####
+   # Should be using scale= here
+   ####
+
+   my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.085,0.915), key=TRUE`;
    #### Would be nice to have key=FALSE but get a 'margin too large' error
 
    if ($hierarch_clust) {
@@ -505,7 +509,7 @@ sub draw_heatmap {
    # Make a custom legend
    push @cmds, q`col.text <- format(col.breaks, digits=2);`,
                q`col.text <- mapply( function(x,i){ if(i%%4==1) {x} else {""} }, col.text, 1:length(col.text) );`,
-               q`legend(-0.04,0.925, legend=col.text, fill=c(col.palette,NA), ncol=1, bty="n", border="NA", x.intersp=0.5, y.intersp=0.50, cex=1.0, xpd=TRUE);`;
+               q`legend(-0.04,0.925, title="Abundance (%)", legend=c(NA,col.text), fill=c(NA,col.palette,NA), ncol=1, bty="n", border="NA", x.intersp=0.5, y.intersp=0.50, cex=1.0, xpd=TRUE);`;
 
    push @cmds, q`dev.off();`;
 
