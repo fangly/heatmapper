@@ -483,12 +483,8 @@ sub draw_heatmap {
       die "Error: No such color palette, '$palette'\n";
    }
 
-   ####
-   # Should be using scale= here
-   ####
-
    my $plot_cmd = q`heatmap.2(as.matrix(HM), trace='none', col=col.palette, breaks=col.breaks, RowSideColors=colors, labRow=taxa, Rowv=FALSE, margins=c(bottom_mar,right_mar), lhei=c(0.10,0.80), lwid=c(0.085,0.915), key=TRUE`;
-   #### Would be nice to have key=FALSE but get a 'margin too large' error
+   ### Would be nice to have key=FALSE but I get a 'margin too large' error
 
    if ($hierarch_clust) {
       $plot_cmd .= q`, Colv=TRUE, dendrogram="column"`;
