@@ -14,7 +14,9 @@ heatmapper - Make a heatmap from an OTU table
 
 =head1 DESCRIPTION
 
-This will run R heatmap and colorize species belonging to the same taxon.
+Heatmapper runs heatmap.2 in R to generate a heatmap. This script automates the
+process and add options to add taxonomic labels, color by taxon taxon, have a
+logarithmic scale and use color palettes with multiple colors.
 
 =head1 REQUIRED ARGUMENTS
 
@@ -23,14 +25,16 @@ This will run R heatmap and colorize species belonging to the same taxon.
 =item -i <input_file>
 
 A tab-separated community table. Rows represent different species while columns
-are the different sites (or samples). Row and column names (headers) are expected.
-Taxonomic assignments should be semi-colon delimited, such as in the Greengenes
+are the different sites (or samples). Row and column names (headers) are expected,
+and although it is not enforced, the sum of all species is expected to add up to
+100. Taxonomic assignments should be semi-colon delimited, such as in the Greengenes
 or Silva formats, e.g.:
 
    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
    Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
 
-WARNING: THE FILE HAS TO BE SORTED TAXONOMICALLY!
+Valid input format include QIIME, or matrix format. Note: You should probably
+sort your input file taxonomically to take advantage of the taxon coloring.
 
 =for Euclid:
     input_file.type: readable
@@ -125,7 +129,9 @@ specifies which graphic format to use: SVG, PDF, PNG, etc. Default: output_name.
 
 =item -s <width>x<height>
 
-Size (width and height) of the output image, in pixels. Default: width.defaultxheight.default
+Size (width and height) of the output image, in pixels. If you get an error
+message about margins being too large, you might have to increase the weight or
+height. Default: width.defaultxheight.default
 
 =for Euclid:
     width.type: +integer
@@ -148,13 +154,6 @@ heatmapper -i otu_table.txt -s 30x5
 heatmapper -i otu_table.txt -p o -s 5000x1000 -o heatmap.png
 
 =back
-
-=head1 AUTHOR
-
-Florent Angly <florent.angly@gmail.com>
-
-This script is simply a convenient wrapper to draw heatmaps. But all the useful
-code was taken from existing scripts written by Dana Willner.
 
 =head1 INSTALLATION
 
@@ -233,10 +232,19 @@ through the CPAN command-line application will be installed in your home directo
 Then, install HeatMapper by following the instructions detailed in
 the "Procedure" section.
 
+=head1 AUTHOR
+
+Florent Angly <florent.angly@gmail.com>
+
+=head1 ACKNOWLEDGEMENTS
+
+Credits go to Dana Willner for showing me R's heatmap.2 and for writing the
+initial code for coloring taxa. Heatmapper was built on top of these foundations.
+
 =head1 BUGS
 
 There are undoubtedly serious bugs lurking somewhere in this code.
-Bug reports and other feedback are most welcome.
+Bug reports and other feedback are most welcome: L<http://github.com/fangly/heatmapper/issues>
 
 =head1 COPYRIGHT
 
