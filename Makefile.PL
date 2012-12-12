@@ -46,7 +46,7 @@ auto_doc();
 sub auto_doc {
    print "*** Building doc...\n";
    # Generate script/heatmapper.pod
-   pod_from 'scripts/my_script.pl';
+   pod_from 'script/heatmapper';
    my $file = 'script/heatmapper.pod';
    my $man_dir = 'man';
    if (not -d $man_dir) {
