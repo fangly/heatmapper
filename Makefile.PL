@@ -4,10 +4,10 @@ name     'heatmapper';
 all_from 'script/heatmapper';
 license  'gpl3'; # Module::Install 1.04 does not parse the GPL version number
 
-#resources
-#   homepage   '';
-#   bugtracker '';
-#   repository '';
+resources
+   homepage   'http://github.com/fangly/heatmapper';
+   bugtracker 'http://github.com/fangly/heatmapper/issues';
+   repository 'http://github.com/fangly/heatmapper';
 
 # List of dependencies
 build_requires  'Test::More'                       =>  0;
@@ -18,6 +18,7 @@ author_requires 'Module::Install'                  =>  0;
 author_requires 'Module::Install::AuthorRequires'  =>  0;
 author_requires 'Module::Install::AutoLicense'     =>  0;
 author_requires 'Module::Install::AutoManifest'    =>  0;
+author_requires 'Module::Install::PodFromEuclid '  =>  0;
 author_requires 'Module::Install::ReadmeFromPod'   =>  0.16;
 requires_external_bin 'R';
 
@@ -45,8 +46,7 @@ auto_doc();
 sub auto_doc {
    print "*** Building doc...\n";
    # Generate script/heatmapper.pod
-   my @args = ($^X, '-Ilib', 'script/heatmapper', '--podfile');
-   system(@args) == 0 or die "System call to '@args' failed:\n$?\n";
+   pod_from 'scripts/my_script.pl';
    my $file = 'script/heatmapper.pod';
    my $man_dir = 'man';
    if (not -d $man_dir) {
