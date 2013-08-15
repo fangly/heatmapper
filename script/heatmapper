@@ -468,10 +468,10 @@ sub draw_heatmap {
       qq`$format(output_file, width=width, height=height);`;
 
    # Select the specified color palette
-   if ($palette ne 'Jet' and $pallette ne 'Jet2') {
+   if ($palette ne 'Jet' and $palette ne 'Jet2') {
       # 8 color purple to red palette
       push @cmds, q`col.breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`,
-                  qq`col.palette <- c("white",brewer.pal(7,"$pallette"))`;
+                  qq`col.palette <- c("white",brewer.pal(7,"$palette"))`;
    } elsif ($palette eq 'Jet') {
       # 32 colors blue to green to red palette
       push @cmds, q`num_colors <- 32;`,
