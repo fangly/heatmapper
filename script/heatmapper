@@ -6,7 +6,7 @@ heatmapper - Make heatmaps of biological communities
 
 =head1 VERSION
 
-0.71
+0.8
 
 =head1 SYNOPSIS
 
@@ -87,10 +87,14 @@ Default: legend_taxonomy.default
 
 =item -p <palette_col>
 
-Palette of colors to use: 'PuRd', an 8-color palette going from white to
-red, 'Jet', a 32-color palette going from blue to green to red, 'Jet2', another
-jet palette that starts with darker blue, has less cyan in the middle, and ends
-with lighter red. Default: palette_col.default
+Palette of colors to use:
+  * Jet : a 32-color palette going from blue to green to red
+  * Jet2: another 32-color jet palette that starts with darker blue, has less cyan in
+          the middle, and ends with lighter red.
+  * any sequential L<RColorBrewer|http://svitsrv25.epfl.ch/R-doc/library/RColorBrewer/html/ColorBrewer.html> color palette (8-colors):
+          Blues BuGn BuPu GnBu Greens Greys Oranges OrRd PuBu PuBuGn PuRd
+          Purples RdPu Reds YlGn YlGnBu YlOrBr YlOrRd
+Default: palette_col.default
 
 =for Euclid:
     palette_col.type: /(?:Blues|BuGn|BuPu|GnBu|Greens|Greys|Oranges|OrRd|PuBu|PuBuGn|PuRd|Purples|RdPu|Reds|YlGn|YlGnBu|YlOrBr|YlOrRd|Jet|Jet2)/
@@ -100,7 +104,9 @@ with lighter red. Default: palette_col.default
 =item -n <na_col>
 
 For species with an abundance of zero, instead of using the color specified by
-<palette_col>, use the plot background color. Default: na_col.default
+<palette_col>, use the plot background color. This makes it easier to
+distinguish between species that were present at low abundance and species that
+were not observed at all. Default: na_col.default
 
 =for Euclid:
     na_col.type: /0|1/
@@ -145,13 +151,13 @@ height. Default: width.defaultxheight.default
 
 =over
 
-=item * SVG output with phylum colors
+=item * SVG output with phylum-level colors
 
 heatmapper -i otu_table.txt -s 30x5
 
 =item * PNG output, coloring at the order taxonomic level
 
-heatmapper -i otu_table.txt -p o -s 5000x1000 -o heatmap.png
+heatmapper -i otu_table.txt -t o -s 5000x1000 -o heatmap.png
 
 =back
 

@@ -1,5 +1,8 @@
 Revision history for Grinder
 
+0.8   16-Aug-2013
+      All RColorBrewer palettes available (patch by Connor Skennerton)
+
 0.7   10-Dec-2012
       Draw a better, customized legend
       Option to draw missing species transparently
