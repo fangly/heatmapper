@@ -6,7 +6,7 @@ heatmapper - Make heatmaps of biological communities
 
 =head1 VERSION
 
-0.7
+0.71
 
 =head1 SYNOPSIS
 
@@ -93,9 +93,9 @@ jet palette that starts with darker blue, has less cyan in the middle, and ends
 with lighter red. Default: palette_col.default
 
 =for Euclid:
-    palette_col.type: /(?:PuRd|Jet|Jet2)/
+    palette_col.type: /(?:Blues|BuGn|BuPu|GnBu|Greens|Greys|Oranges|OrRd|PuBu|PuBuGn|PuRd|Purples|RdPu|Reds|YlGn|YlGnBu|YlOrBr|YlOrRd|Jet|Jet2)/
     palette_col.default: 'Jet'
-    palette_col.type.error: <palette_col> can only be 'Jet' or 'PuRd'.
+    palette_col.type.error: <palette_col> can only be 'Jet', 'Jet2' or one of the Rcolorbrewer sequential colour pallettes.
 
 =item -n <na_col>
 
@@ -468,10 +468,10 @@ sub draw_heatmap {
       qq`$format(output_file, width=width, height=height);`;
 
    # Select the specified color palette
-   if ($palette eq 'PuRd') {
+   if ($palette ne 'Jet' and $palette ne 'Jet2') {
       # 8 color purple to red palette
       push @cmds, q`col.breaks <- c(0,0.01,0.1,1,5,10,25,50,100);`,
-                  q`col.palette <- c("white",brewer.pal(7,"PuRd"))`;
+                  qq`col.palette <- c("white",brewer.pal(7,"$palette"))`;
    } elsif ($palette eq 'Jet') {
       # 32 colors blue to green to red palette
       push @cmds, q`num_colors <- 32;`,
