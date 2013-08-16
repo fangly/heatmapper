@@ -18,7 +18,7 @@ author_requires 'Module::Install'                  =>  0;
 author_requires 'Module::Install::AuthorRequires'  =>  0;
 author_requires 'Module::Install::AutoLicense'     =>  0;
 author_requires 'Module::Install::AutoManifest'    =>  0;
-author_requires 'Module::Install::PodFromEuclid '  =>  0;
+author_requires 'Module::Install::PodFromEuclid'   =>  0;
 author_requires 'Module::Install::ReadmeFromPod'   =>  0.16;
 requires_external_bin 'R';
 
