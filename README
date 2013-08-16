@@ -1,28 +1,33 @@
 NAME
-    heatmapper - Make a heatmap from an OTU table
+    heatmapper - Make heatmaps of biological communities
 
 VERSION
-    This document refers to heatmapper version 0.7
+    This document refers to heatmapper version 0.8
 
 SYNOPSIS
       heatmapper -i otu_table.txt
 
 DESCRIPTION
-    This will run R heatmap and colorize species belonging to the same
-    taxon.
+    Heatmapper runs heatmap.2 in R to generate a heatmap. This script
+    automates the process and add options to add taxonomic labels, color by
+    taxon taxon, have a logarithmic scale and use color palettes with
+    multiple colors.
 
 REQUIRED ARGUMENTS
     -i <input_file>
         A tab-separated community table. Rows represent different species
         while columns are the different sites (or samples). Row and column
-        names (headers) are expected. Taxonomic assignments should be
-        semi-colon delimited, such as in the Greengenes or Silva formats,
-        e.g.:
+        names (headers) are expected, and although it is not enforced, the
+        sum of all species is expected to add up to 100. Taxonomic
+        assignments should be semi-colon delimited, such as in the
+        Greengenes or Silva formats, e.g.:
 
            k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
            Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
 
-        WARNING: THE FILE HAS TO BE SORTED TAXONOMICALLY!
+        Valid input format include QIIME, or matrix format. Note: You should
+        probably sort your input file taxonomically to take advantage of the
+        taxon coloring.
 
 OPTIONAL ARGUMENTS
     -m <matrix_file>
@@ -55,15 +60,20 @@ OPTIONAL ARGUMENTS
         Default: auto
 
     -p <palette_col>
-        Palette of colors to use: 'PuRd', an 8-color palette going from
-        white to red, 'Jet', a 32-color palette going from blue to green to
-        red, 'Jet2', another jet palette that starts with darker blue, has
-        less cyan in the middle, and ends with lighter red. Default: Jet
+        Palette of colors to use: * Jet : a 32-color palette going from blue
+        to green to red * Jet2: another 32-color jet palette that starts
+        with darker blue, has less cyan in the middle, and ends with lighter
+        red. * any sequential RColorBrewer
+        <http://svitsrv25.epfl.ch/R-doc/library/RColorBrewer/html/ColorBrewe
+        r.html> color palette (8-colors): Blues BuGn BuPu GnBu Greens Greys
+        Oranges OrRd PuBu PuBuGn PuRd Purples RdPu Reds YlGn YlGnBu YlOrBr
+        YlOrRd Default: Jet
 
     -n <na_col>
         For species with an abundance of zero, instead of using the color
-        specified by <palette_col>, use the plot background color. Default:
-        0
+        specified by <palette_col>, use the plot background color. This
+        makes it easier to distinguish between species that were present at
+        low abundance and species that were not observed at all. Default: 0
 
     -h <hierarch_clust>
         Whether or not to cluster the samples hierarchically and display a
@@ -76,23 +86,18 @@ OPTIONAL ARGUMENTS
         Default: heatmapper.svg
 
     -s <width>x<height>
-        Size (width and height) of the output image, in pixels. Default:
-        20x20
+        Size (width and height) of the output image, in pixels. If you get
+        an error message about margins being too large, you might have to
+        increase the weight or height. Default: 20x20
 
 EXAMPLES
-    *   SVG output with phylum colors
+    *   SVG output with phylum-level colors
 
         heatmapper -i otu_table.txt -s 30x5
 
     *   PNG output, coloring at the order taxonomic level
 
-        heatmapper -i otu_table.txt -p o -s 5000x1000 -o heatmap.png
-
-AUTHOR
-    Florent Angly <florent.angly@gmail.com>
-
-    This script is simply a convenient wrapper to draw heatmaps. But all the
-    useful code was taken from existing scripts written by Dana Willner.
+        heatmapper -i otu_table.txt -t o -s 5000x1000 -o heatmap.png
 
 INSTALLATION
   Dependencies
@@ -149,9 +154,18 @@ INSTALLATION
     Then, install HeatMapper by following the instructions detailed in the
     "Procedure" section.
 
+AUTHOR
+    Florent Angly <florent.angly@gmail.com>
+
+ACKNOWLEDGEMENTS
+    Credits go to Dana Willner for showing me R's heatmap.2 and for writing
+    the initial code for coloring taxa. Heatmapper was built on top of these
+    foundations.
+
 BUGS
     There are undoubtedly serious bugs lurking somewhere in this code. Bug
-    reports and other feedback are most welcome.
+    reports and other feedback are most welcome:
+    <http://github.com/fangly/heatmapper/issues>
 
 COPYRIGHT
     Copyright 2012, Florent Angly
