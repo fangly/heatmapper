@@ -1,5 +1,8 @@
 Revision history for Grinder
 
+0.81  03-Sep-2013
+      Fixed bug with taxonomic strings containing apostrophes
+
 0.8   16-Aug-2013
       All RColorBrewer palettes available (patch by Connor Skennerton)
 

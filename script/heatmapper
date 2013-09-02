@@ -6,7 +6,7 @@ heatmapper - Make heatmaps of biological communities
 
 =head1 VERSION
 
-0.8
+0.81
 
 =head1 SYNOPSIS
 
@@ -24,17 +24,17 @@ logarithmic scale and use color palettes with multiple colors.
 
 =item -i <input_file>
 
-A tab-separated community table. Rows represent different species while columns
-are the different sites (or samples). Row and column names (headers) are expected,
-and although it is not enforced, the sum of all species is expected to add up to
-100. Taxonomic assignments should be semi-colon delimited, such as in the Greengenes
-or Silva formats, e.g.:
+A tab-separated community table in site-by-species matrix format. Rows represent
+different species while columns are the different sites (or samples). Row and
+column names (headers) are expected, and although it is not enforced, the sum of
+all species is expected to add up to 100. Taxonomic assignments should be semi-
+colon delimited, such as in the Greengenes or Silva formats, e.g.:
 
    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
    Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
 
-Valid input format include QIIME, or matrix format. Note: You should probably
-sort your input file taxonomically to take advantage of the taxon coloring.
+Note: You should probably sort your input file taxonomically to take advantage
+of the taxon coloring.
 
 =for Euclid:
     input_file.type: readable
@@ -280,7 +280,7 @@ use File::Basename;
 use File::Temp qw/ tempfile /;
 use Statistics::R;  
 use Getopt::Euclid qw( :minimal_keys );
-our $VERSION = 0.8;
+our $VERSION = 0.81;
 heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{p}, $ARGV{n}, $ARGV{h},
    $ARGV{o}, $ARGV{s}{width}, $ARGV{s}{height});
 exit;
@@ -456,9 +456,10 @@ sub draw_heatmap {
    my @cmds = (
        q`library(gplots);`,
        q`library(RColorBrewer);`,
-       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="");`,
+       q`HMold<-read.table(community_file, header=TRUE, sep="\t", comment.char="", quote="");`,
        # row.names=1 ?
        # use comment.char="" to avoid R interpreting # as a comment
+       # use quote="" to avoid R from expecting quoted strings and choke on apostrophes
    );
 
    if ($na_col) {
