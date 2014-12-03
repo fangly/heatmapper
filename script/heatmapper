@@ -396,25 +396,29 @@ sub process_taxa {
       push @taxo_colors, $colors_by_taxo{$taxo};
 
       # Determine text to display for this taxon
-      if ($legend_taxonomy eq 'full') {
+      if ($full_taxo =~ /^other|unknown|unassigned/gi) {
          $taxo = $full_taxo;
-      } elsif ($legend_taxonomy eq 'first') {
-         $taxo = shift @groups;
-      } elsif ($legend_taxonomy eq 'last') {
-         $taxo = pop @groups;
-      } elsif ($legend_taxonomy eq 'local') {
-         $taxo = $taxo;
-      } elsif ($legend_taxonomy eq 'auto') {
-         my $max = scalar @groups - 1;
-         for my $i (0 .. $max) {
-            my $level = $groups[$i];
-            if ($level eq $taxo) {
-               $taxo = join ';', @groups[$i+1 .. $max];
-               last;
-            }
-         }
       } else {
-         die "Error: '$legend_taxonomy' is not a valid value for <legend_taxonomy>\n";
+         if ($legend_taxonomy eq 'full') {
+            $taxo = $full_taxo;
+         } elsif ($legend_taxonomy eq 'first') {
+            $taxo = shift @groups;
+         } elsif ($legend_taxonomy eq 'last') {
+            $taxo = pop @groups;
+         } elsif ($legend_taxonomy eq 'local') {
+            $taxo = $taxo;
+         } elsif ($legend_taxonomy eq 'auto') {
+            my $max = scalar @groups - 1;
+            for my $i (0 .. $max) {
+               my $level = $groups[$i];
+               if ($level eq $taxo) {
+                  $taxo = join ';', @groups[$i+1 .. $max];
+                  last;
+               }
+            }
+         } else {
+            die "Error: '$legend_taxonomy' is not a valid value for <legend_taxonomy>\n";
+         }
       }
       push @taxa, $taxo;
 
