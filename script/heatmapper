@@ -33,9 +33,6 @@ colon delimited, such as in the Greengenes or Silva formats, e.g.:
    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
    Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
 
-Note: You should probably sort your input file taxonomically to take advantage
-of the taxon coloring.
-
 =for Euclid:
     input_file.type: readable
 
@@ -289,13 +286,27 @@ exit;
 sub heatmapper {
    my ($input_file, $matrix_file, $taxo_level, $legend_taxonomy, $palette,
       $na_col, $hierarch_clust, $output_name, $width, $height) = @_;
-   my $samples = process_samples($input_file);
-   my ($colors, $taxa) = process_taxa($input_file, $taxo_level, $legend_taxonomy);
-   my $output_file = draw_heatmap($input_file, $colors, $taxa, $samples,
+   my $sorted_file = sort_taxa($input_file);
+   my $samples = process_samples($sorted_file);
+   my ($colors, $taxa) = process_taxa($sorted_file, $taxo_level, $legend_taxonomy);
+   my $output_file = draw_heatmap($sorted_file, $colors, $taxa, $samples,
       $hierarch_clust, $output_name, $width, $height, $matrix_file, $palette,
       $na_col);
    print "Heatmap written in file '$output_file'.\n";
    return 1;
+}
+
+
+sub sort_taxa {
+   # Sort the lines of the file by taxa (lexically)
+   my ($infile) = @_;
+   open my $in, '<', $infile or die "Error: Could not read file '$infile'\n$!\n";
+   my ($out, $outfile) = tempfile('heatmapper_XXXXXX', TMPDIR => 1, UNLINK => 1);
+   print $out scalar(readline($in)); # print header
+   print $out sort(readline($in));   # print sorted content
+   close $in;
+   close $out;
+   return $outfile;
 }
 
 

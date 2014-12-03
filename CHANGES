@@ -1,5 +1,9 @@
 Revision history for Grinder
 
+0.x   xx-xxx-xxxx
+      Data is now automatically sorted by taxa
+      
+
 0.81  03-Sep-2013
       Fixed bug with taxonomic strings containing apostrophes (ticket #2)
 
