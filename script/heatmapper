@@ -277,7 +277,7 @@ use File::Basename;
 use File::Temp qw/ tempfile /;
 use Statistics::R;  
 use Getopt::Euclid qw( :minimal_keys );
-our $VERSION = 0.81;
+our $VERSION = 0.9;
 heatmapper($ARGV{i}, $ARGV{m}, $ARGV{t}, $ARGV{l}, $ARGV{p}, $ARGV{n}, $ARGV{h},
    $ARGV{o}, $ARGV{s}{width}, $ARGV{s}{height});
 exit;

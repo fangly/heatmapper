@@ -6,7 +6,7 @@ heatmapper - Make heatmaps of biological communities
 
 =head1 VERSION
 
-This document refers to heatmapper version 0.8 
+This document refers to heatmapper version 0.9 
 
 =head1 SYNOPSIS
 
@@ -24,17 +24,14 @@ logarithmic scale and use color palettes with multiple colors.
 
 =item -i <input_file>
 
-A tab-separated community table. Rows represent different species while columns
-are the different sites (or samples). Row and column names (headers) are expected,
-and although it is not enforced, the sum of all species is expected to add up to
-100. Taxonomic assignments should be semi-colon delimited, such as in the Greengenes
-or Silva formats, e.g.:
+A tab-separated community table in site-by-species matrix format. Rows represent
+different species while columns are the different sites (or samples). Row and
+column names (headers) are expected, and although it is not enforced, the sum of
+all species is expected to add up to 100. Taxonomic assignments should be semi-
+colon delimited, such as in the Greengenes or Silva formats, e.g.:
 
    k__Archaea;p__Euryarchaeota;c__Thermoplasmata;o__E2;f__MarinegroupII;g__
    Archaea;Euryarchaeota;Thermoplasmata;E2;MarinegroupII;Other
-
-Valid input format include QIIME, or matrix format. Note: You should probably
-sort your input file taxonomically to take advantage of the taxon coloring.
 
 =back
 
